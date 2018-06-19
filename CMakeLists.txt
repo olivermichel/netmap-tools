@@ -23,7 +23,7 @@ endif ()
 
 enable_testing()
 
-add_executable(test_runner test/test_runner.cc include/netmap_tools.h)
+add_executable(test_runner test/test_runner.cc test/iface_test.cc  include/netmap_tools.h)
 target_include_directories(test_runner PUBLIC include)
 target_include_directories(test_runner PUBLIC test/include)
 

@@ -27,6 +27,5 @@ add_executable(test_runner test/test_runner.cc test/iface_test.cc  include/netma
 target_include_directories(test_runner PUBLIC include)
 target_include_directories(test_runner PUBLIC test/include)
 
-add_test(NAME netmap_iface WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND test_runner netmap_iface)
+add_test(NAME iface WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND test_runner iface)
 

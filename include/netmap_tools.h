@@ -34,7 +34,9 @@ namespace netmap {
 
 	public:
 		explicit iface(const std::string& iface_name_)
-			: _nmd(_open(iface_name_)) { }
+			: _nmd(_open(iface_name_)),
+			  tx_rings(*this, _ring_proxy::dir::tx),
+			  rx_rings(*this, _ring_proxy::dir::rx) { }
 
 		inline unsigned count_rx_rings() const
 		{
@@ -45,6 +47,20 @@ namespace netmap {
 		{
 			return _nmd->req.nr_tx_rings;
 		}
+
+		int fd() const
+		{
+			return _nmd->fd;
+		}
+
+
+		~iface()
+		{
+			nm_close(_nmd);
+		}
+
+		_ring_proxy tx_rings;
+		_ring_proxy rx_rings;
 
 	private:
 		struct nm_desc* _open(const std::string& iface_name_)

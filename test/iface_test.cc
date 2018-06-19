@@ -46,5 +46,23 @@ TEST_CASE("iface", "[iface]")
 	{
 		CHECK(test_iface.fd() > 0);
 	}
+
+	SECTION("_ring")
+	{
+		auto tx_ring = test_iface.tx_rings[0];
+		auto rx_ring = test_iface.rx_rings[0];
+
+		SECTION("count_slots")
+		{
+			CHECK(tx_ring.count_slots() > 0);
+			CHECK(rx_ring.count_slots() > 0);
+		}
+
+		SECTION("buffer_size")
+		{
+			CHECK(tx_ring.buffer_size() > 0);
+			CHECK(rx_ring.buffer_size() > 0);
+		}
+	}
 }
 

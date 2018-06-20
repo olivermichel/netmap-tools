@@ -8,82 +8,94 @@ namespace netmap {
 	
 	class iface
 	{
-		class _ring
+		class ring
 		{
 		public:
-			explicit _ring(const iface& iface_, netmap_ring* ring_) 
-				: _iface(iface_),
-				  _ring_ptr(ring_) { }
+			ring() = delete;
+			explicit ring(netmap_ring* ring_)
+				: _ring(ring_) { }
 
+			ring(const ring&) = delete;
+			ring& operator=(const ring&) = delete;
+
+			ring(ring&&) = default;
+			ring& operator=(ring&&) = default;
+			
 			unsigned count_slots() const
 			{
-				return _ring_ptr->num_slots;
+				return _ring->num_slots;
 			}
 
 			unsigned buffer_size() const
 			{
-				return _ring_ptr->nr_buf_size;
-			}
-			
-			char* buf()
-			{
-				if (_ring_ptr->head != _ring_ptr->tail) {
-					// while (_ring_ptr->head == _ring_ptr->tail) { }
-					_head = _ring_ptr->head;
-					unsigned next_head = nm_ring_next(_ring_ptr, _head);
-					struct netmap_slot* slot = _ring_ptr->slot + _head;
-					return NETMAP_BUF(_ring_ptr, slot->buf_idx);
-				}
-				return nullptr;
+				return _ring->nr_buf_size;
 			}
 
-			void advance(unsigned len_ = 0)
+			~ring()
 			{
-				if (len_)
-					(_ring_ptr->slot + _head)->len = len_;
-
-				_ring_ptr->cur = _ring_ptr->head = _head;
+				_ring = nullptr;
 			}
 
 		private:
-			const iface& _iface;
-			netmap_ring* _ring_ptr = nullptr;
-			unsigned _head = 0;
+			netmap_ring* _ring;
+		};
+
+		class tx_ring : public ring
+		{
+		public:
+			tx_ring(netmap_ring* ring_)
+				: ring(ring_) { }
+		};
+
+		class rx_ring : public ring
+		{
+		public:
+			rx_ring(netmap_ring* ring_)
+				: ring(ring_) { }
 		};
 
 		class _ring_proxy
 		{
 		public:
-			enum class dir { rx = 0, tx = 1 };
-	
-			explicit _ring_proxy(const iface& iface_, dir dir_)
-				: _dir(dir_), 
-				  _iface(iface_) { }
-
-			_ring operator[](unsigned i_) 
-			{
-				switch (_dir) {
-					case dir::rx:
-						if (i_ >= _iface.count_rx_rings())
-							throw std::logic_error("netmap::iface: invalid rx ring id " + i_);
-						return _ring(_iface, NETMAP_RXRING(_iface._nmd->nifp, i_));
-					case dir::tx:
-						if (i_ >= _iface.count_tx_rings())
-							throw std::logic_error("netmap::iface: invalid tx ring id " + i_);
-						return _ring(_iface, NETMAP_TXRING(_iface._nmd->nifp, i_));
-				}
-			}
-
-		private:
-			dir _dir;
+			explicit _ring_proxy(const iface& iface_)
+				: _iface(iface_) { }
+		protected:
 			const iface& _iface;
 		};
 
+		class _tx_ring_proxy : public _ring_proxy
+		{
+		public:
+			explicit _tx_ring_proxy(const iface& iface_)
+				: _ring_proxy(iface_) { }	
+			
+			tx_ring operator[](unsigned i_)
+			{
+				if (i_ >= _iface.count_tx_rings())
+					throw std::logic_error("netmap::iface: invalid tx ring id " + i_);
+
+				return tx_ring(NETMAP_TXRING(_iface._nmd->nifp, i_));
+			}
+		};
+
+		class _rx_ring_proxy : public _ring_proxy
+		{
+		public:
+			explicit _rx_ring_proxy(const iface& iface_) 
+				: _ring_proxy(iface_) { }
+
+			rx_ring operator[](unsigned i_)
+			{
+				if (i_ >= _iface.count_rx_rings())
+					throw std::logic_error("netmap::iface: invalid rx ring id " + i_);
+				
+				return rx_ring(NETMAP_RXRING(_iface._nmd->nifp, i_));
+			}
+		};
+	
 	public:
 		explicit iface(const std::string& iface_name_)
-			: _nmd(_open(iface_name_)),
-			  tx_rings(*this, _ring_proxy::dir::tx),
-			  rx_rings(*this, _ring_proxy::dir::rx) { }
+			: _nmd(_open(iface_name_)), tx_rings(*this), rx_rings(*this) { }
 
 		inline unsigned count_rx_rings() const
 		{
@@ -105,8 +117,8 @@ namespace netmap {
 			nm_close(_nmd);
 		}
 
-		_ring_proxy tx_rings;
-		_ring_proxy rx_rings;
+		_tx_ring_proxy tx_rings;
+		_rx_ring_proxy rx_rings;
 
 	private:
 		struct nm_desc* _open(const std::string& iface_name_)

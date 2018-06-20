@@ -94,6 +94,23 @@ namespace netmap {
 		};
 	
 	public:
+
+		static unsigned count_tx_rings(const std::string& iface_name_)
+		{
+			auto nmd = _open(iface_name_);
+			auto nr_tx_rings = nmd->req.nr_tx_rings;
+			_close(nmd);
+			return nr_tx_rings;
+		}
+
+		static unsigned count_rx_rings(const std::string& iface_name_)
+		{
+			auto nmd = _open(iface_name_);
+			auto nr_rx_rings = nmd->req.nr_rx_rings;
+			_close(nmd);
+			return nr_rx_rings;
+		}
+
 		explicit iface(const std::string& iface_name_)
 			: _nmd(_open(iface_name_)), tx_rings(*this), rx_rings(*this) { }
 
@@ -121,7 +138,8 @@ namespace netmap {
 		_rx_ring_proxy rx_rings;
 
 	private:
-		struct nm_desc* _open(const std::string& iface_name_)
+		
+		static nm_desc* _open(const std::string& iface_name_)
 		{
 			struct nm_desc base_nmd { };
 			bzero(&base_nmd, sizeof(base_nmd));
@@ -135,6 +153,26 @@ namespace netmap {
 			return nmd;
 		}
 
+		static void _close(nm_desc* nmd_)
+		{
+			nm_close(nmd_);	
+		}
+
+/*
+		struct nm_desc* _open(const std::string& iface_name_)
+		{
+			struct nm_desc base_nmd { };
+			bzero(&base_nmd, sizeof(base_nmd));
+			struct nm_desc* nmd = nm_open(("netmap:" + iface_name_).c_str(), nullptr, 0, &base_nmd);
+
+			if (!nmd)
+				throw std::runtime_error("netmap::iface: could not open device " + iface_name_);
+
+			struct netmap_if* nifp = nmd->nifp;
+			struct nmreq* req = &nmd->req;
+			return nmd;
+		}
+*/
 		struct nm_desc* _nmd = nullptr;
 	};
 }

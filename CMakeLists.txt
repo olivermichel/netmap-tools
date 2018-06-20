@@ -13,6 +13,14 @@ else()
 	set(CMAKE_CXX_FLAGS "-fpermissive")
 endif()
 
+set(CXXOPTS_VERSION 2.0.0)
+
+if(NOT EXISTS ${CMAKE_HOME_DIRECTORY}/ext/include/cxxopts/cxxopts.h)
+	file(DOWNLOAD
+		https://raw.githubusercontent.com/jarro2783/cxxopts/v${CXXOPTS_VERSION}/include/cxxopts.hpp
+		${CMAKE_HOME_DIRECTORY}/ext/include/cxxopts/cxxopts.h)
+endif()
+
 set(CATCH_VERSION 2.2.2)
 
 if (NOT EXISTS ${CMAKE_HOME_DIRECTORY}/test/include/catch.h)
@@ -28,4 +36,8 @@ target_include_directories(test_runner PUBLIC include)
 target_include_directories(test_runner PUBLIC test/include)
 
 add_test(NAME iface WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND test_runner iface)
+
+add_executable(pkt_sender examples/pkt_sender.cc examples/pkt_sender_config.h include/netmap_tools.h)
+target_include_directories(pkt_sender PUBLIC include)
+target_include_directories(pkt_sender PUBLIC ext/include)
 

@@ -27,11 +27,14 @@ namespace netmap {
 			
 			char* buf()
 			{
-				while (_ring_ptr->head == _ring_ptr->tail) { }
-				_head = _ring_ptr->head;
-				unsigned next_head = nm_ring_next(_ring_ptr, _head);
-				struct netmap_slot* slot = _ring_ptr->slot + _head;
-				return NETMAP_BUF(_ring_ptr, slot->buf_idx);
+				if (_ring_ptr->head != _ring_ptr->tail) {
+					// while (_ring_ptr->head == _ring_ptr->tail) { }
+					_head = _ring_ptr->head;
+					unsigned next_head = nm_ring_next(_ring_ptr, _head);
+					struct netmap_slot* slot = _ring_ptr->slot + _head;
+					return NETMAP_BUF(_ring_ptr, slot->buf_idx);
+				}
+				return nullptr;
 			}
 
 			void advance(unsigned len_ = 0)
@@ -74,7 +77,6 @@ namespace netmap {
 		private:
 			dir _dir;
 			const iface& _iface;
-			std::vector<_ring> _rings;
 		};
 
 	public:

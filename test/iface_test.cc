@@ -1,6 +1,6 @@
 
 #include <catch.h>
-
+#include <cstring>
 #include <netmap_tools.h>
 
 TEST_CASE("iface", "[iface]")

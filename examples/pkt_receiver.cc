@@ -12,23 +12,21 @@ int main(int argc_, char** argv_)
 	pkt_receiver::config config = pkt_receiver::_parse_config(pkt_receiver::_set_options(), argc_, argv_);
 	netmap::iface iface(config.iface_name);
 	signal(SIGINT, pkt_receiver::signal_handler);	
-/*
+
 	struct pollfd fds;
 	fds.fd = iface.fd();
-	fds.events = POLLOUT;
-
-	char* buf  = nullptr;
-	
-	char msg[14] = {0};
+	fds.events = POLLIN;
 
 	pkt_receiver::start = std::chrono::high_resolution_clock::now();
 
+	unsigned int len = 0;
+	char* buf = nullptr;
+
 	while (pkt_receiver::run) {
 		poll(&fds, 1, -1);
-		while(iface.tx_rings[0].avail()) {
-			if (buf = iface.tx_rings[0].next_buf()) {
-				std::memcpy(buf, msg, 14);	
-				iface.tx_rings[0].advance(14);
+		while(iface.rx_rings[0].avail()) {
+			if (buf = iface.rx_rings[0].next_buf(len)) {
+				iface.rx_rings[0].advance();
 				pkt_receiver::count++;
 			}
 		}
@@ -39,7 +37,7 @@ int main(int argc_, char** argv_)
 	auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - pkt_receiver::start);
 	double time_s = (double) dur.count() / 1000000;
 	std::cout << pkt_receiver::count / time_s << std::endl;
-*/
+
 	return 0;
 }
 

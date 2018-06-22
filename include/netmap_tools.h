@@ -85,6 +85,20 @@ namespace netmap {
 		public:
 			rx_ring(netmap_ring* ring_)
 				: ring(ring_) { }
+
+			char* next_buf(unsigned& len_)
+			{
+				if (_ring->cur != _ring->tail) {
+					len_ = _ring->slot[_ring->cur].len;
+					return NETMAP_BUF(_ring, _ring->slot[_ring->cur].buf_idx);
+				} else return nullptr;
+			}
+
+			void advance()
+			{
+				unsigned i = _ring->cur;
+				_ring->head = _ring->cur = nm_ring_next(_ring, i);
+			}
 		};
 
 		class _ring_proxy

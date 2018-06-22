@@ -13,24 +13,19 @@ int main(int argc_, char** argv_)
 	netmap::iface iface(config.iface_name);
 	signal(SIGINT, pkt_receiver::signal_handler);	
 
-	struct pollfd fds;
-	fds.fd = iface.fd();
-	fds.events = POLLIN;
+	struct pollfd fds { .fd = iface.fd(), .events = POLLIN };
 
 	pkt_receiver::start = std::chrono::high_resolution_clock::now();
 
 	unsigned int len = 0;
 	char* buf = nullptr;
 
-	while (pkt_receiver::run) {
-		poll(&fds, 1, -1);
+	while (pkt_receiver::run && poll(&fds, 1, -1)) {
 		while(iface.rx_rings[0].avail()) {
-			if (buf = iface.rx_rings[0].next_buf(len)) {
-				iface.rx_rings[0].advance();
-				pkt_receiver::count++;
-			}
+			buf = iface.rx_rings[0].next_buf(len);
+			iface.rx_rings[0].advance();
+			pkt_receiver::count++;
 		}
-		ioctl(NIOCTXSYNC, iface.fd());
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();

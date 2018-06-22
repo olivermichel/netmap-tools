@@ -1,15 +1,27 @@
 
 #include <cxxopts/cxxopts.h>
+#include <chrono>
 
 namespace pkt_sender {
-	struct config {
+	
+	bool run = true;
+	unsigned long long count = 0;
+	std::chrono::time_point<std::chrono::high_resolution_clock> start;
+	
+	struct config
+	{
 		std::string iface_name;
 		unsigned char src_addr[6];
 		unsigned char dst_addr[6];
 		bool verbose = false;
 	};
 
-	void _print_help(cxxopts::Options& opts_, int exit_code_ = 0)
+	void signal_handler(int sig_)
+	{
+		run = false;
+	}
+
+	void _print_help(cxxopts::Options& opts_, int exit_code_ = 0) 
 	{
 		std::ostream& os = (exit_code_ ? std::cerr : std::cout);
 		os << opts_.help({""}) << std::endl;

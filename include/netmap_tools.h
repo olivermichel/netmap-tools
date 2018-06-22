@@ -21,14 +21,35 @@ namespace netmap {
 			ring(ring&&) = default;
 			ring& operator=(ring&&) = default;
 			
-			unsigned count_slots() const
+			inline unsigned count_slots() const
 			{
 				return _ring->num_slots;
 			}
 
-			unsigned buffer_size() const
+			inline unsigned buffer_size() const
 			{
 				return _ring->nr_buf_size;
+			}
+
+			inline unsigned head() const
+			{
+				return _ring->head;
+			}
+
+			inline unsigned tail() const
+			{
+				return _ring->tail;
+			}
+
+			inline unsigned current() const
+			{
+				return _ring->cur;
+			}
+
+			inline bool avail() const
+			{
+				return _ring->cur != _ring->tail;
+			
 			}
 
 			~ring()
@@ -36,7 +57,7 @@ namespace netmap {
 				_ring = nullptr;
 			}
 
-		private:
+		protected:
 			netmap_ring* _ring;
 		};
 
@@ -45,6 +66,18 @@ namespace netmap {
 		public:
 			tx_ring(netmap_ring* ring_)
 				: ring(ring_) { }
+
+			char* next_buf()
+			{
+				return _ring->cur != _ring->tail ? NETMAP_BUF(_ring, _ring->slot[_ring->cur].buf_idx) : nullptr;
+			}
+
+			void advance(unsigned pkt_len_)
+			{
+				unsigned i = _ring->cur;
+				_ring->slot[i].len = pkt_len_;
+				_ring->head = _ring->cur = nm_ring_next(_ring, i);
+			}
 		};
 
 		class rx_ring : public ring

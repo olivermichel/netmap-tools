@@ -27,7 +27,8 @@ int main(int argc_, char** argv_)
 	while (poll(&fds, 1, -1) && pkt_sender::run) {
 		while(iface.tx_rings[0].avail()) {
 			buf = iface.tx_rings[0].next_buf();
-			iface.tx_rings[0].advance(14);
+			std::memcpy(buf, msg, 14);
+			iface.tx_rings[0].advance(14)
 			pkt_sender::count++;
 		}
 	}

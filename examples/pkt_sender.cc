@@ -13,9 +13,7 @@ int main(int argc_, char** argv_)
 	netmap::iface iface(config.iface_name);
 	signal(SIGINT, pkt_sender::signal_handler);	
 
-	struct pollfd fds;
-	fds.fd = iface.fd();
-	fds.events = POLLOUT;
+	struct pollfd fds { .fd = iface.fd(), .events = POLLOUT };
 
 	char* buf  = nullptr;
 	
@@ -26,16 +24,12 @@ int main(int argc_, char** argv_)
 
 	pkt_sender::start = std::chrono::high_resolution_clock::now();
 
-	while (pkt_sender::run) {
-		poll(&fds, 1, -1);
+	while (poll(&fds, 1, -1) && pkt_sender::run) {
 		while(iface.tx_rings[0].avail()) {
-			if (buf = iface.tx_rings[0].next_buf()) {
-				std::memcpy(buf, msg, 14);	
-				iface.tx_rings[0].advance(14);
-				pkt_sender::count++;
-			}
+			buf = iface.tx_rings[0].next_buf();
+			iface.tx_rings[0].advance(14);
+			pkt_sender::count++;
 		}
-		ioctl(NIOCTXSYNC, iface.fd());
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();

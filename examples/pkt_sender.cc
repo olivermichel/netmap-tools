@@ -11,12 +11,12 @@ int main(int argc_, char** argv_)
 {
 	pkt_sender::config config = pkt_sender::_parse_config(pkt_sender::_set_options(), argc_, argv_);
 	netmap::iface iface(config.iface_name);
-	signal(SIGINT, pkt_sender::signal_handler);	
+	signal(SIGINT, pkt_sender::signal_handler);
 
 	struct pollfd fds { .fd = iface.fd(), .events = POLLOUT };
 
 	char* buf  = nullptr;
-	
+
 	char msg[14] = {0};
 	struct ether_header* eth = (struct ether_header*) msg;
 	std::memcpy(eth->ether_dhost, config.dst_addr, 6);
@@ -28,8 +28,11 @@ int main(int argc_, char** argv_)
 		while(iface.tx_rings[0].avail()) {
 			buf = iface.tx_rings[0].next_buf();
 			std::memcpy(buf, msg, 14);
-			iface.tx_rings[0].advance(14)
+			iface.tx_rings[0].advance(14);
 			pkt_sender::count++;
+
+			if (config.verbose)
+				std::cout << pkt_sender::count << std::endl;
 		}
 	}
 
@@ -40,4 +43,3 @@ int main(int argc_, char** argv_)
 
 	return 0;
 }
-

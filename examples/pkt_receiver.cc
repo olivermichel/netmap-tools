@@ -11,7 +11,7 @@ int main(int argc_, char** argv_)
 {
 	pkt_receiver::config config = pkt_receiver::_parse_config(pkt_receiver::_set_options(), argc_, argv_);
 	netmap::iface iface(config.iface_name);
-	signal(SIGINT, pkt_receiver::signal_handler);	
+	signal(SIGINT, pkt_receiver::signal_handler);
 
 	struct pollfd fds { .fd = iface.fd(), .events = POLLIN };
 
@@ -25,6 +25,9 @@ int main(int argc_, char** argv_)
 			buf = iface.rx_rings[0].next_buf(len);
 			iface.rx_rings[0].advance();
 			pkt_receiver::count++;
+
+			if (config.verbose)
+				std::cout << pkt_receiver::count << std::endl;
 		}
 	}
 
@@ -35,4 +38,3 @@ int main(int argc_, char** argv_)
 
 	return 0;
 }
-

@@ -1,0 +1,8 @@
+---
+- name: configure netmap
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - include_role:
+        name: netmap

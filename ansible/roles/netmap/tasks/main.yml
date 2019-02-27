@@ -1,0 +1,29 @@
+---
+- name: repository is checked out
+  git:
+    repo: https://github.com/luigirizzo/netmap.git
+    version: v11.4
+    dest: "{{ src_dir }}"
+
+- name: build is configured
+  command: ./configure
+  args:
+    chdir: "{{ src_dir }}/LINUX"
+    creates: config.status
+
+- name: kernel extension is built
+  command: make
+  args:
+    chdir: "{{ src_dir }}/LINUX"
+    creates: netmap.ko
+
+- name: kernel version is registered
+  command: uname -r
+  register: kernel_release
+  changed_when: False
+
+- name: is installed
+  command: make install
+  args:
+    chdir: "{{ src_dir }}/LINUX"
+    creates: "/lib/modules/{{ kernel_release.stdout }}/extra/netmap.ko"

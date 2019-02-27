@@ -2,3 +2,6 @@ build/
 test/include
 *.swp
 ext/
+.idea
+*.retry
+build/

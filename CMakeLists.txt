@@ -31,9 +31,9 @@ endif ()
 
 enable_testing()
 
-add_executable(test_runner test/test_runner.cc test/iface_test.cc  include/netmap_tools.h)
-target_include_directories(test_runner PUBLIC include)
-target_include_directories(test_runner PUBLIC test/include)
+add_executable(unit test/unit.cc test/iface_test.cc  include/netmap_tools.h)
+target_include_directories(unit PUBLIC include)
+target_include_directories(unit PUBLIC test/include)
 
 add_test(NAME iface WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND test_runner iface)
 

@@ -26,7 +26,7 @@ int main(int argc_, char** argv_)
 			iface.rx_rings[0].advance();
 			pkt_receiver::count++;
 
-			if (config.verbose)
+			if (config.verbosity > 0)
 				std::cout << pkt_receiver::count << std::endl;
 		}
 	}

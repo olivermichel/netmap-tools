@@ -18,7 +18,7 @@ int main(int argc_, char** argv_)
 	char* buf  = nullptr;
 
 	char msg[14] = {0};
-	struct ether_header* eth = (struct ether_header*) msg;
+	auto eth = (struct ether_header*) msg;
 	std::memcpy(eth->ether_dhost, config.dst_addr, 6);
 	std::memcpy(eth->ether_shost, config.src_addr, 6);
 
@@ -31,7 +31,7 @@ int main(int argc_, char** argv_)
 			iface.tx_rings[0].advance(14);
 			pkt_sender::count++;
 
-			if (config.verbose)
+			if (config.verbosity > 0)
 				std::cout << pkt_sender::count << std::endl;
 		}
 	}

@@ -13,7 +13,7 @@ namespace pkt_sender {
 		std::string iface_name;
 		unsigned char src_addr[6];
 		unsigned char dst_addr[6];
-		bool verbose = false;
+		unsigned verbosity = 0;
 	};
 
 	void signal_handler(int sig_)
@@ -33,10 +33,11 @@ namespace pkt_sender {
 		cxxopts::Options opts("pkt_sender", " - ");
 
 		opts.add_options()
-			("i,interface", "sets the sender interface [required]", cxxopts::value<std::string>(), "IFACE")
-			("s,source", "sets the source mac addr [required]", cxxopts::value<std::string>(), "SRC")
-			("d,destination", "sets the destination mac addr [required]", cxxopts::value<std::string>(), "DEST")
-			("v,verbose", "print intermediate output (optional)")
+			("i,interface", "sender interface [required]", cxxopts::value<std::string>(), "IFACE")
+			("s,source", "source mac address [required]", cxxopts::value<std::string>(), "SRC")
+			("d,destination", "destination mac address [required]", cxxopts::value<std::string>(),
+			        "DEST")
+			("v,verbose", "print intermediate output [optional]")
 			("h,help", "print this help message");
 
 		return opts;
@@ -46,7 +47,8 @@ namespace pkt_sender {
 	{
 		int temp[6] = {0};
 
-		if (std::sscanf(str_, "%x:%x:%x:%x:%x:%x", &temp[0], &temp[1], &temp[2], &temp[3], &temp[4], &temp[5]) != 6)
+		if (std::sscanf(str_, "%x:%x:%x:%x:%x:%x", &temp[0], &temp[1], &temp[2], &temp[3], &temp[4],
+				&temp[5]) != 6)
 			throw std::invalid_argument("parse_mac_addr: invalid format");
 
 		for (unsigned i = 0; i < 6; i++)
@@ -78,7 +80,7 @@ namespace pkt_sender {
 			_print_help(opts_);
 		}
 
-		config.verbose = (bool) parsed_opts.count("v");
+		config.verbosity = (unsigned) parsed_opts.count("v");
 
 		return config;
 	}

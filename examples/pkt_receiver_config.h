@@ -11,7 +11,7 @@ namespace pkt_receiver {
 	struct config
 	{
 		std::string iface_name;
-		bool verbose = false;
+		unsigned verbosity = 0;
 	};
 
 	void signal_handler(int sig_)
@@ -51,7 +51,7 @@ namespace pkt_receiver {
 		else
 			_print_help(opts_);
 
-		config.verbose = (bool) parsed_opts.count("v");
+		config.verbosity = (unsigned) parsed_opts.count("v");
 
 		return config;
 	}

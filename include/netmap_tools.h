@@ -69,7 +69,8 @@ namespace netmap {
 
 			char* next_buf()
 			{
-				return _ring->cur != _ring->tail ? NETMAP_BUF(_ring, _ring->slot[_ring->cur].buf_idx) : nullptr;
+				return _ring->cur != _ring->tail ?
+					NETMAP_BUF(_ring, _ring->slot[_ring->cur].buf_idx) : nullptr;
 			}
 
 			void advance(unsigned pkt_len_)
@@ -83,7 +84,7 @@ namespace netmap {
 		class rx_ring : public ring
 		{
 		public:
-			rx_ring(netmap_ring* ring_)
+			explicit rx_ring(netmap_ring* ring_)
 				: ring(ring_) { }
 
 			char* next_buf(unsigned& len_)
@@ -119,7 +120,8 @@ namespace netmap {
 			tx_ring operator[](unsigned i_)
 			{
 				if (i_ >= _iface.count_tx_rings())
-					throw std::logic_error("netmap::iface: invalid tx ring id " + i_);
+					throw std::logic_error("netmap::iface: invalid tx ring id "
+					+ std::to_string(i_));
 
 				return tx_ring(NETMAP_TXRING(_iface._nmd->nifp, i_));
 			}
@@ -134,7 +136,8 @@ namespace netmap {
 			rx_ring operator[](unsigned i_)
 			{
 				if (i_ >= _iface.count_rx_rings())
-					throw std::logic_error("netmap::iface: invalid rx ring id " + i_);
+					throw std::logic_error("netmap::iface: invalid rx ring id "
+					+ std::to_string(i_));
 				
 				return rx_ring(NETMAP_RXRING(_iface._nmd->nifp, i_));
 			}

@@ -130,6 +130,11 @@ namespace netmap {
             {
                 return _iface._nmd->req.nr_tx_rings;
             }
+
+			inline void synchronize()
+			{
+				ioctl(_iface._nmd->fd, NIOCTXSYNC);
+			}
 		};
 
 		class _rx_ring_proxy : public _ring_proxy
@@ -151,6 +156,11 @@ namespace netmap {
             {
                 return _iface._nmd->req.nr_rx_rings;
             }
+
+            inline void synchronize()
+			{
+				ioctl(_iface._nmd->fd, NIOCRXSYNC);
+			}
 		};
 	
 	public:

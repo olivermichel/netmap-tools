@@ -30,6 +30,16 @@ on other side:
     
     sudo pkt-gen -f rx -i netmap:enp2s0f1
 
+## Example Applications
+
+on one side:
+
+    sudo build/debug-gcc8/pkt_sender -i enp2s0f0 -s 68:05:ca:39:84:94 -d 68:05:ca:39:84:95
+
+on other side:
+
+    sudo build/debug-gcc8/pkt_receiver -i enp2s0f1
+
 ## Interface Library Receiver Example
 
 ```cpp

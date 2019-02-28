@@ -1,29 +1,63 @@
 ---
+- name: kernel version is registered
+  shell: uname -r | egrep '^[0-9]*\.[0-9]*.[0-9]*-[0-9]*' -o
+  register: kernel_release
+  changed_when: False
+
+
+
+- name: kernel headers and sources are installed
+  apt: name={{item}}
+  with_items:
+    - "linux-headers-{{kernel_release.stdout}}-generic"
+    - "linux-headers-{{kernel_release.stdout}}"
+    - linux-source
+
+- name: libelf is installed
+  apt: name=libelf-dev
+
+# ->  /usr/src/linux-source-4.15.0/
+# -> linux-headers-4.15.0-45-generic
+
+- set_fact: kernel_sources="/usr/src/linux-source-{{kernel_release.stdout}}"
+
+- set_fact: kernel_dir="/usr/src/linux-headers-{{kernel_release.stdout}}"
+
+- debug: msg="{{ kernel_release.stdout}}"
+
+- debug: msg="{{ ansible_processor_cores }}"
+
+- debug: msg="{{ kernel_sources }}"
+
+- debug: msg="{{ kernel_dir }}"
+
 - name: repository is checked out
   git:
     repo: https://github.com/luigirizzo/netmap.git
-    version: v11.4
+    version: "{{ version }}"
     dest: "{{ src_dir }}"
 
+
+#- name: build is configured
+#  command: "./configure --no-drivers"
+#  args:
+#    chdir: "{{ src_dir }}/LINUX"
+#    creates: config.status
+
 - name: build is configured
-  command: ./configure
+  command: "./configure --kernel-sources={{kernel_sources}} --kernel-dir={{kernel_dir}}-generic --drivers={{drivers}}"
   args:
     chdir: "{{ src_dir }}/LINUX"
     creates: config.status
 
 - name: kernel extension is built
-  command: make
+  command: "make -j{{ansible_processor_cores}}"
   args:
     chdir: "{{ src_dir }}/LINUX"
     creates: netmap.ko
-
-- name: kernel version is registered
-  command: uname -r
-  register: kernel_release
-  changed_when: False
 
 - name: is installed
   command: make install
   args:
     chdir: "{{ src_dir }}/LINUX"
-    creates: "/lib/modules/{{ kernel_release.stdout }}/extra/netmap.ko"
+    creates: "/lib/modules/{{ kernel_release.stdout }}-generic/extra/netmap.ko"

@@ -1,2 +1,4 @@
 ---
 src_dir: /root/opt/netmap
+version: v13.0
+drivers: e1000e,ixgbe,i40

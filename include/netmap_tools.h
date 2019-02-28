@@ -64,7 +64,7 @@ namespace netmap {
 		class tx_ring : public ring
 		{
 		public:
-			tx_ring(netmap_ring* ring_)
+			explicit tx_ring(netmap_ring* ring_)
 				: ring(ring_) { }
 
 			char* next_buf()
@@ -76,7 +76,7 @@ namespace netmap {
 			void advance(unsigned pkt_len_)
 			{
 				unsigned i = _ring->cur;
-				_ring->slot[i].len = pkt_len_;
+				_ring->slot[i].len = (uint16_t) pkt_len_;
 				_ring->head = _ring->cur = nm_ring_next(_ring, i);
 			}
 		};
@@ -208,21 +208,6 @@ namespace netmap {
 			nm_close(nmd_);	
 		}
 
-/*
-		struct nm_desc* _open(const std::string& iface_name_)
-		{
-			struct nm_desc base_nmd { };
-			bzero(&base_nmd, sizeof(base_nmd));
-			struct nm_desc* nmd = nm_open(("netmap:" + iface_name_).c_str(), nullptr, 0, &base_nmd);
-
-			if (!nmd)
-				throw std::runtime_error("netmap::iface: could not open device " + iface_name_);
-
-			struct netmap_if* nifp = nmd->nifp;
-			struct nmreq* req = &nmd->req;
-			return nmd;
-		}
-*/
 		struct nm_desc* _nmd = nullptr;
 	};
 }

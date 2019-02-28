@@ -22,28 +22,28 @@ TEST_CASE("iface", "[iface]")
 
 	SECTION("count_tx_rings")
 	{
-		REQUIRE(test_iface.count_tx_rings() > 0);
+		REQUIRE(test_iface.tx_rings.count() > 0);
 	}
 
 	SECTION("count_rx_rings")
 	{
-		REQUIRE(test_iface.count_rx_rings() > 0);
+		REQUIRE(test_iface.rx_rings.count() > 0);
 	}
 
 	SECTION("tx_rings.operator[]")
 	{
-		for (unsigned i = 0; i < test_iface.count_tx_rings(); i++)
+		for (unsigned i = 0; i < test_iface.tx_rings.count(); i++)
 			CHECK_NOTHROW(test_iface.tx_rings[i]);
 
-		CHECK_THROWS(test_iface.tx_rings[test_iface.count_tx_rings()]);
+		CHECK_THROWS(test_iface.tx_rings[test_iface.tx_rings.count()]);
 	}
 
 	SECTION("rx_rings.operator[]")
 	{
-		for (unsigned i = 0; i < test_iface.count_rx_rings(); i++)
+		for (unsigned i = 0; i < test_iface.rx_rings.count(); i++)
 			CHECK_NOTHROW(test_iface.rx_rings[i]);
 	
-		CHECK_THROWS(test_iface.rx_rings[test_iface.count_rx_rings()]);
+		CHECK_THROWS(test_iface.rx_rings[test_iface.rx_rings.count()]);
 	}
 
 	SECTION("fd")

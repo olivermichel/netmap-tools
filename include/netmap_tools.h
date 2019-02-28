@@ -119,12 +119,17 @@ namespace netmap {
 			
 			tx_ring operator[](unsigned i_)
 			{
-				if (i_ >= _iface.count_tx_rings())
+				if (i_ >= _iface.tx_rings.count())
 					throw std::logic_error("netmap::iface: invalid tx ring id "
 					+ std::to_string(i_));
 
 				return tx_ring(NETMAP_TXRING(_iface._nmd->nifp, i_));
 			}
+
+            inline unsigned count() const
+            {
+                return _iface._nmd->req.nr_tx_rings;
+            }
 		};
 
 		class _rx_ring_proxy : public _ring_proxy
@@ -135,12 +140,17 @@ namespace netmap {
 
 			rx_ring operator[](unsigned i_)
 			{
-				if (i_ >= _iface.count_rx_rings())
+				if (i_ >= _iface.rx_rings.count())
 					throw std::logic_error("netmap::iface: invalid rx ring id "
 					+ std::to_string(i_));
 				
 				return rx_ring(NETMAP_RXRING(_iface._nmd->nifp, i_));
 			}
+
+			inline unsigned count() const
+            {
+                return _iface._nmd->req.nr_rx_rings;
+            }
 		};
 	
 	public:
@@ -163,16 +173,6 @@ namespace netmap {
 
 		explicit iface(const std::string& iface_name_)
 			: _nmd(_open(iface_name_)), tx_rings(*this), rx_rings(*this) { }
-
-		inline unsigned count_rx_rings() const
-		{
-			return _nmd->req.nr_rx_rings;
-		}
-
-		inline unsigned count_tx_rings() const
-		{
-			return _nmd->req.nr_tx_rings;
-		}
 
 		int fd() const
 		{

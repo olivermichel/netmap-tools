@@ -24,7 +24,7 @@ int main(int argc_, char** argv_)
 
 	pkt_sender::start = std::chrono::high_resolution_clock::now();
 
-	while (poll(&fds, 1, -1) && pkt_sender::run) {
+	while (pkt_sender::run && poll(&fds, 1, -1)) {
 		for (unsigned tx_ring_id = 0; tx_ring_id < iface.tx_rings.count(); tx_ring_id++) {
 			while (iface.tx_rings[tx_ring_id].avail()) {
 				buf = iface.tx_rings[tx_ring_id].next_buf();
@@ -32,7 +32,7 @@ int main(int argc_, char** argv_)
 				iface.tx_rings[tx_ring_id].advance(14);
 				pkt_sender::count++;
 
-				if (config.verbosity > 0)
+				if (config.verbosity > 0 && pkt_sender::count % 100000 == 0)
 					std::cout << pkt_sender::count << std::endl;
 			}
 		}

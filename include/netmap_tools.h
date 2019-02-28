@@ -208,8 +208,8 @@ namespace netmap {
 			if (!nmd)
 				throw std::runtime_error("netmap::iface: could not open device " + iface_name_);
 
-			struct netmap_if* nifp = nmd->nifp;
-			struct nmreq* req = &nmd->req;
+//			struct netmap_if* nifp = nmd->nifp;
+//			struct nmreq* req = &nmd->req;
 			return nmd;
 		}
 

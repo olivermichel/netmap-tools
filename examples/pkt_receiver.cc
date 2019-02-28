@@ -21,14 +21,17 @@ int main(int argc_, char** argv_)
 	char* buf = nullptr;
 
 	while (pkt_receiver::run && poll(&fds, 1, -1)) {
-		while(iface.rx_rings[0].avail()) {
-			buf = iface.rx_rings[0].next_buf(len);
-			iface.rx_rings[0].advance();
-			pkt_receiver::count++;
+		for (unsigned rx_ring_id = 0; rx_ring_id < iface.rx_rings.count(); rx_ring_id++) {
+			while (iface.rx_rings[rx_ring_id].avail()) {
+				buf = iface.rx_rings[rx_ring_id].next_buf(len);
+				iface.rx_rings[rx_ring_id].advance();
+				pkt_receiver::count++;
 
-			if (config.verbosity > 0)
-				std::cout << pkt_receiver::count << std::endl;
+				if (config.verbosity > 0 && pkt_receiver::count % 100000 == 0)
+					std::cout << pkt_receiver::count << std::endl;
+			}
 		}
+		iface.rx_rings.synchronize();
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();

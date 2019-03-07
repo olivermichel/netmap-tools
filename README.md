@@ -8,7 +8,7 @@ in /ansible:
     
 load kernel module and run tests :
 
-    sudo modprobe netmap
+    sudo modprobe netmap if_size=2048
     sudo ip link set up dev enp2s0f0
     sudo TEST_IFACE=enp2s0f0 build/debug-gcc8/unit
 

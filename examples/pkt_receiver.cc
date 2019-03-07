@@ -9,7 +9,8 @@
 
 int main(int argc_, char** argv_)
 {
-	pkt_receiver::config config = pkt_receiver::_parse_config(pkt_receiver::_set_options(), argc_, argv_);
+	pkt_receiver::config config
+		= pkt_receiver::_parse_config(pkt_receiver::_set_options(), argc_, argv_);
 	netmap::iface iface(config.iface_name);
 	signal(SIGINT, pkt_receiver::signal_handler);
 

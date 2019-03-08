@@ -1,7 +1,7 @@
 
 #define NETMAP_WITH_LIBS
 #include <net/netmap_user.h>
-
+#include <vector>
 #include <stdexcept>
 
 namespace netmap {
@@ -107,15 +107,27 @@ namespace netmap {
 		public:
 			explicit _ring_proxy(const iface& iface_)
 				: _iface(iface_) { }
+
+			inline const std::vector<unsigned>& fd_rings() const
+			{
+				return _fd_rings;
+			}
+
 		protected:
 			const iface& _iface;
+			std::vector<unsigned> _fd_rings;
 		};
 
 		class _tx_ring_proxy : public _ring_proxy
 		{
 		public:
 			explicit _tx_ring_proxy(const iface& iface_)
-				: _ring_proxy(iface_) { }	
+				: _ring_proxy(iface_)
+			{
+				for (unsigned i = 0; i < _iface.tx_rings.count(); i++)
+					if (rx_ring(NETMAP_TXRING(_iface._nmd->nifp, i)).buffer_size() > 0)
+						_fd_rings.push_back(i);
+			}
 			
 			tx_ring operator[](unsigned i_)
 			{
@@ -141,7 +153,12 @@ namespace netmap {
 		{
 		public:
 			explicit _rx_ring_proxy(const iface& iface_) 
-				: _ring_proxy(iface_) { }
+				: _ring_proxy(iface_)
+			{
+				for (unsigned i = 0; i < _iface.rx_rings.count(); i++)
+					if (rx_ring(NETMAP_RXRING(_iface._nmd->nifp, i)).buffer_size() > 0)
+						_fd_rings.push_back(i);
+			}
 
 			rx_ring operator[](unsigned i_)
 			{
@@ -164,7 +181,7 @@ namespace netmap {
 		};
 	
 	public:
-
+/*
 		static unsigned count_tx_rings(const std::string& iface_name_)
 		{
 			auto nmd = _open(iface_name_);
@@ -180,7 +197,7 @@ namespace netmap {
 			_close(nmd);
 			return nr_rx_rings;
 		}
-
+*/
 		explicit iface(const std::string& iface_name_)
 			: _nmd(_open(iface_name_)), tx_rings(*this), rx_rings(*this) { }
 
@@ -208,8 +225,8 @@ namespace netmap {
 			if (!nmd)
 				throw std::runtime_error("netmap::iface: could not open device " + iface_name_);
 
-//			struct netmap_if* nifp = nmd->nifp;
-//			struct nmreq* req = &nmd->req;
+
+
 			return nmd;
 		}
 

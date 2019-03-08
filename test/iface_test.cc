@@ -8,11 +8,7 @@ TEST_CASE("iface", "[iface]")
 	REQUIRE(std::getenv("TEST_IFACE") != nullptr);
 	std::string iface_name = std::string(std::getenv("TEST_IFACE"));
 
-	CHECK(netmap::iface::count_tx_rings(iface_name) > 0);
-	CHECK(netmap::iface::count_rx_rings(iface_name) > 0);
-	
 	netmap::iface test_iface(iface_name);
-	unsigned tx_rings_count = 0, rx_rings_count = 0;
 
 	SECTION("iface")
 	{

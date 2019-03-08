@@ -44,3 +44,7 @@ target_include_directories(pkt_sender PUBLIC ext/include)
 add_executable(pkt_receiver examples/pkt_receiver.cc examples/pkt_receiver_config.h include/netmap_tools.h)
 target_include_directories(pkt_receiver PUBLIC include)
 target_include_directories(pkt_receiver PUBLIC ext/include)
+
+add_executable(netmap_info examples/netmap_info.cc include/netmap_tools.h)
+target_include_directories(netmap_info PUBLIC include)
+target_include_directories(netmap_info PUBLIC ext/include)
